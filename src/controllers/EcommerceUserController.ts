@@ -105,6 +105,7 @@ export const Me = async (req: Request, res: Response) => {
 		id: ecommerceUser.id,
 		firstName: ecommerceUser.firstName,
 		lastName: ecommerceUser.lastName,
+		isAdmin: ecommerceUser.isAdmin,
 	});
 };
 
@@ -122,6 +123,7 @@ export const UpdateEcommerceUser = async (req: Request, res: Response) => {
 		bornDate,
 		oldPassword,
 		newPassword,
+		isAdmin,
 	} = req.body;
 	const ecommerceUserID = req.userID;
 
@@ -131,6 +133,10 @@ export const UpdateEcommerceUser = async (req: Request, res: Response) => {
 		});
 		if (!ecommerceUser)
 			return res.status(400).json({ error: 'User not found' });
+
+		if (isAdmin) {
+			await EcommerceUser.update(ecommerceUserID, { isAdmin });
+		}
 
 		if (oldPassword && newPassword) {
 			const compareOldPassword = await bcrypt.compare(

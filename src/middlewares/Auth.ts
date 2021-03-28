@@ -2,23 +2,20 @@ import { sign, verify } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { EcommerceUser } from '../entity/EcommerceUser';
 
-declare global {
-	namespace Express {
-		interface Request {
-			userID: number;
-		}
-	}
-}
-
 interface userPayload {
 	email: string;
 	id: number;
+	isAdmin: boolean;
 	iat: number;
 }
 
 export const createTokens = (ecommerceUser: EcommerceUser) => {
 	const acessToken = sign(
-		{ email: ecommerceUser.email, id: ecommerceUser.id },
+		{
+			email: ecommerceUser.email,
+			id: ecommerceUser.id,
+			isAdmin: ecommerceUser.isAdmin,
+		},
 		'lembrademudar',
 		{ expiresIn: 86400 }
 	);
@@ -41,7 +38,7 @@ export const validateToken = (
 		console.log(validToken);
 		if (validToken) {
 			req.userID = validToken.id;
-
+			req.isAdmin = validToken.isAdmin;
 			return next();
 		}
 	} catch (err) {

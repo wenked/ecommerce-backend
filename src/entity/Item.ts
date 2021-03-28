@@ -16,6 +16,9 @@ export class Item extends BaseEntity {
 	name: string;
 
 	@Column()
+	description: string;
+
+	@Column()
 	category: string;
 
 	@Column()
