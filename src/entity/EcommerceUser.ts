@@ -4,10 +4,11 @@ import {
 	Column,
 	CreateDateColumn,
 	UpdateDateColumn,
+	BaseEntity,
 } from 'typeorm';
 
 @Entity()
-export class EcommerceUser {
+export class EcommerceUser extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
 
@@ -17,8 +18,8 @@ export class EcommerceUser {
 	@Column()
 	lastName: string;
 
-	@CreateDateColumn()
-	bornDate: Date;
+	@Column()
+	bornDate: string;
 
 	@Column()
 	street: string;
@@ -43,6 +44,8 @@ export class EcommerceUser {
 
 	@Column()
 	password: string;
+	@Column({ default: false })
+	isAdmin: boolean;
 
 	@CreateDateColumn()
 	createdAt: Date;

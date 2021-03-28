@@ -4,24 +4,25 @@ import {
 	Column,
 	CreateDateColumn,
 	UpdateDateColumn,
+	BaseEntity,
 } from 'typeorm';
 
 @Entity()
-export class EcommerceUser {
+export class Item extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column()
-	firstName: string;
-
-	@Column()
-	lastName: string;
-
 	@Column({ unique: true })
-	email: string;
+	name: string;
 
 	@Column()
-	password: string;
+	category: string;
+
+	@Column()
+	price: number;
+
+	@Column()
+	inventory: number;
 
 	@CreateDateColumn()
 	createdAt: Date;

@@ -2,14 +2,16 @@ import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import express from 'express';
 import routes from './routes';
+import cookieParser from 'cookie-parser';
 
-const bodyParser = require('body-parser');
+//const bodyParser = require('body-parser');
 
 const dotenv = require('dotenv').config();
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(cookieParser());
 app.use(routes);
 
 (async () => {
