@@ -27,6 +27,9 @@ export class Item extends BaseEntity {
 	@Column()
 	inventory: number;
 
+	@Column()
+	imgUrl: string;
+
 	@CreateDateColumn()
 	createdAt: Date;
 

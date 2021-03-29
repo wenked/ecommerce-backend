@@ -2,7 +2,7 @@ import { Item } from '../entity/Item';
 import { Request, Response } from 'express';
 
 export const AddItem = async (req: Request, res: Response) => {
-	const { name, description, category, price, inventory } = req.body;
+	const { name, description, category, price, inventory, imgUrl } = req.body;
 
 	try {
 		if (!name || !description || !category || !price)
@@ -13,6 +13,7 @@ export const AddItem = async (req: Request, res: Response) => {
 			category,
 			price,
 			inventory,
+			imgUrl,
 		}).save();
 
 		return res.status(200).json({ message: 'item successfully added', item });
@@ -23,64 +24,118 @@ export const AddItem = async (req: Request, res: Response) => {
 };
 
 export const RemoveItem = async (req: Request, res: Response) => {
-	const { id, quantity } = req.body;
+	const { items } = req.body;
 
-	if (!id) res.status(404).json({ error: 'Missing params' });
+	if (items.length === 0)
+		return res.status(404).json({ error: 'Missing params' });
 
 	try {
-		const item = await Item.findOne({ where: { id } });
-		if (!item) return res.send(400).json({ error: 'Item not found' });
+		const errorsId = [];
+		const errorsInventory = [];
+		const itemsRemoved = [];
+		let teste = 0;
 
-		if (item.inventory < quantity)
-			return res.send(400).json({ error: 'not enough inventory' });
+		await items.forEach(async (item) => {
+			const dbitem = await Item.findOne({ where: { id: item.id } });
 
-		await Item.update(id, { inventory: item.inventory - quantity });
+			if (!dbitem) {
+				errorsId.push({ message: 'Item not found', id: item.id });
 
-		if (item.inventory === 0) {
-			await Item.remove(id);
-		}
+				return;
+			}
 
-		return res.status(200).json({ message: 'Item removed' });
+			if (dbitem.inventory < item.inventory) {
+				errorsInventory.push({
+					message: 'Not enough in inventory',
+					id: item.id,
+					name: dbitem.name,
+				});
+
+				return;
+			}
+
+			await Item.update(item.id, {
+				inventory: dbitem.inventory - item.inventory,
+			});
+
+			itemsRemoved.push({
+				id: item.id,
+				name: dbitem.name,
+				message: 'Item removed successfully',
+			});
+		});
+
+		setTimeout(
+			() => res.status(200).json({ errorsInventory, errorsId, itemsRemoved }),
+			3000
+		);
 	} catch (err) {
 		return res.status(400).json({ err });
 	}
 };
 
 export const UpdateItem = async (req: Request, res: Response) => {
-	const { id, name, price, description, category, inventory } = req.body;
+	const {
+		id,
+		name,
+		price,
+		description,
+		category,
+		inventory,
+		imgUrl,
+		removeFromDb,
+	} = req.body;
 
-	if (!id) {
-		return res.status(404).json({ error: 'Missing id' });
-	}
-	if (inventory) {
-		const item = await Item.findOne({ where: { id } });
+	try {
+		if (!id) {
+			return res.status(404).json({ error: 'Missing id' });
+		}
 
-		if (!item) return res.status(400).json({ error: 'No item found' });
+		if (removeFromDb) {
+			await Item.createQueryBuilder()
+				.delete()
+				.where('id = :id', { id: id })
+				.execute();
 
-		await Item.update(id, { inventory: item.inventory + inventory });
+			return res
+				.status(200)
+				.json({ message: 'Item removed from db successfully' });
+		}
+		if (inventory) {
+			const item = await Item.findOne({ where: { id } });
 
-		return res
-			.status(200)
-			.json({ message: 'Item added successfully in inventory' });
-	}
+			if (!item) return res.status(400).json({ error: 'No item found' });
 
-	if (name) {
-		await Item.update(id, { name });
-	}
+			await Item.update(id, { inventory: item.inventory + inventory });
 
-	if (price) {
-		await Item.update(id, { price });
-	}
+			return res
+				.status(200)
+				.json({ message: 'Item added successfully in inventory' });
+		}
 
-	if (description) {
-		await Item.update(id, { description });
-	}
+		if (name) {
+			await Item.update(id, { name });
+		}
 
-	if (category) {
-		await Item.update(id, { category });
-	}
+		if (imgUrl) {
+			await Item.update(id, { imgUrl });
+		}
 
-	const item = await Item.findOne({ where: id });
+		if (price) {
+			await Item.update(id, { price });
+		}
+
+		if (description) {
+			await Item.update(id, { description });
+		}
+
+		if (category) {
+			await Item.update(id, { category });
+		}
+
+		const item = await Item.findOne({ where: id });
+		return res.status(200).json({ message: 'Update succefully', item });
+	} catch (err) {}
 };
 
 export const ItemsList = async (req: Request, res: Response) => {
