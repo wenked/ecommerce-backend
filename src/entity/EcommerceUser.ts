@@ -39,6 +39,9 @@ export class EcommerceUser extends BaseEntity {
 	@Column()
 	postalCode: number;
 
+	@Column()
+	imgUrl: string;
+
 	@Column({ unique: true })
 	email: string;
 

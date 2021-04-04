@@ -86,56 +86,54 @@ export const UpdateItem = async (req: Request, res: Response) => {
 		removeFromDb,
 	} = req.body;
 
-	try {
-		if (!id) {
-			return res.status(404).json({ error: 'Missing id' });
-		}
+	if (!id) {
+		return res.status(404).json({ error: 'Missing id' });
+	}
 
-		if (removeFromDb) {
-			await Item.createQueryBuilder()
-				.delete()
-				.where('id = :id', { id: id })
-				.execute();
+	if (removeFromDb) {
+		await Item.createQueryBuilder()
+			.delete()
+			.where('id = :id', { id: id })
+			.execute();
 
-			return res
-				.status(200)
-				.json({ message: 'Item removed from db successfully' });
-		}
-		if (inventory) {
-			const item = await Item.findOne({ where: { id } });
+		return res
+			.status(200)
+			.json({ message: 'Item removed from db successfully' });
+	}
+	if (inventory) {
+		const item = await Item.findOne({ where: { id } });
 
-			if (!item) return res.status(400).json({ error: 'No item found' });
+		if (!item) return res.status(400).json({ error: 'No item found' });
 
-			await Item.update(id, { inventory: item.inventory + inventory });
+		await Item.update(id, { inventory: item.inventory + inventory });
 
-			return res
-				.status(200)
-				.json({ message: 'Item added successfully in inventory' });
-		}
+		return res
+			.status(200)
+			.json({ message: 'Item added successfully in inventory' });
+	}
 
-		if (name) {
-			await Item.update(id, { name });
-		}
+	if (name) {
+		await Item.update(id, { name });
+	}
 
-		if (imgUrl) {
-			await Item.update(id, { imgUrl });
-		}
+	if (imgUrl) {
+		await Item.update(id, { imgUrl });
+	}
 
-		if (price) {
-			await Item.update(id, { price });
-		}
+	if (price) {
+		await Item.update(id, { price });
+	}
 
-		if (description) {
-			await Item.update(id, { description });
-		}
+	if (description) {
+		await Item.update(id, { description });
+	}
 
-		if (category) {
-			await Item.update(id, { category });
-		}
+	if (category) {
+		await Item.update(id, { category });
+	}
 
-		const item = await Item.findOne({ where: id });
-		return res.status(200).json({ message: 'Update succefully', item });
-	} catch (err) {}
+	const item = await Item.findOne({ where: id });
+	return res.status(200).json({ message: 'Update succefully', item });
 };
 
 export const ItemsList = async (req: Request, res: Response) => {

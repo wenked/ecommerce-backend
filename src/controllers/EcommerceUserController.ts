@@ -16,6 +16,7 @@ export const Register = async (req: Request, res: Response) => {
 		postalCode,
 		city,
 		state,
+		imgUrl,
 	} = req.body;
 
 	try {
@@ -30,7 +31,8 @@ export const Register = async (req: Request, res: Response) => {
 			!houseNumber ||
 			!postalCode ||
 			!city ||
-			!state
+			!state ||
+			!imgUrl
 		) {
 			return res.status(500).json({ error: 'Missing parms' });
 		}
@@ -45,6 +47,7 @@ export const Register = async (req: Request, res: Response) => {
 			bornDate,
 			street,
 			houseNumber,
+			imgUrl,
 			city,
 			state,
 			postalCode,
@@ -125,6 +128,7 @@ export const Me = async (req: Request, res: Response) => {
 		district: ecommerceUser.district,
 		postalCode: ecommerceUser.postalCode,
 		bornDate: ecommerceUser.bornDate,
+		imgUrl: ecommerceUser.imgUrl,
 		isAdmin: ecommerceUser.isAdmin,
 	});
 };
@@ -138,6 +142,7 @@ export const UpdateEcommerceUser = async (req: Request, res: Response) => {
 		houseNumber,
 		state,
 		city,
+		imgUrl,
 		district,
 		postalCode,
 		bornDate,
@@ -146,6 +151,8 @@ export const UpdateEcommerceUser = async (req: Request, res: Response) => {
 		isAdmin,
 	} = req.body;
 	const ecommerceUserID = req.userID;
+
+	console.log(req.body, 'aqui');
 
 	try {
 		const ecommerceUser = await EcommerceUser.findOne({
@@ -178,6 +185,9 @@ export const UpdateEcommerceUser = async (req: Request, res: Response) => {
 		}
 		if (lastName) {
 			await EcommerceUser.update(ecommerceUserID, { lastName });
+		}
+		if (imgUrl) {
+			await EcommerceUser.update(ecommerceUserID, { imgUrl });
 		}
 		if (email) {
 			await EcommerceUser.update(ecommerceUserID, { email });
