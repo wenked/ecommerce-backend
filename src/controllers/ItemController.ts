@@ -24,9 +24,9 @@ export const AddItem = async (req: Request, res: Response) => {
 };
 
 export const RemoveItem = async (req: Request, res: Response) => {
-	const { items } = req.body;
+	const { cartItems } = req.body;
 
-	if (items.length === 0)
+	if (cartItems.length === 0)
 		return res.status(404).json({ error: 'Missing params' });
 
 	try {
@@ -35,7 +35,7 @@ export const RemoveItem = async (req: Request, res: Response) => {
 		const itemsRemoved = [];
 		let teste = 0;
 
-		await items.forEach(async (item) => {
+		await cartItems.forEach(async (item) => {
 			const dbitem = await Item.findOne({ where: { id: item.id } });
 
 			if (!dbitem) {
@@ -44,7 +44,7 @@ export const RemoveItem = async (req: Request, res: Response) => {
 				return;
 			}
 
-			if (dbitem.inventory < item.inventory) {
+			if (dbitem.inventory < item.amount) {
 				errorsInventory.push({
 					message: 'Not enough in inventory',
 					id: item.id,
@@ -55,7 +55,7 @@ export const RemoveItem = async (req: Request, res: Response) => {
 			}
 
 			await Item.update(item.id, {
-				inventory: dbitem.inventory - item.inventory,
+				inventory: dbitem.inventory - item.amount,
 			});
 
 			itemsRemoved.push({
@@ -90,6 +90,12 @@ export const UpdateItem = async (req: Request, res: Response) => {
 		return res.status(404).json({ error: 'Missing id' });
 	}
 
+	const dbitem = await Item.findOne({ where: { id } });
+
+	if (!dbitem) {
+		return res.status(400).send({ error: 'Item not found' });
+	}
+
 	if (removeFromDb) {
 		await Item.createQueryBuilder()
 			.delete()
@@ -106,14 +112,10 @@ export const UpdateItem = async (req: Request, res: Response) => {
 		if (!item) return res.status(400).json({ error: 'No item found' });
 
 		await Item.update(id, { inventory: item.inventory + inventory });
-
-		return res
-			.status(200)
-			.json({ message: 'Item added successfully in inventory' });
 	}
 
 	if (name) {
-		await Item.update(id, { name });
+		await Item.update(id, { name: name });
 	}
 
 	if (imgUrl) {
@@ -132,7 +134,7 @@ export const UpdateItem = async (req: Request, res: Response) => {
 		await Item.update(id, { category });
 	}
 
-	const item = await Item.findOne({ where: id });
+	const item = await Item.findOne({ where: { id } });
 	return res.status(200).json({ message: 'Update succefully', item });
 };
 
